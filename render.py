@@ -6,6 +6,8 @@ RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 GRAY = (64, 64, 64)
+LGRAY = (128, 128, 128)
+
 YELLOW = (255, 255, 0)
 
 def preprocess_state(state):
@@ -35,21 +37,17 @@ class Renderer:
 
     def find_bounds(self):
         BOUND_L, BOUND_R, BOUND_U, BOUND_D = (0, 0, 0, 0)
-        for x in range(self.world.width):
-            for y in range(self.world.height):
-                for i in range(len(self.world.switches)):
-                    for c in [0, 1]:
-                        state = [x, y] + [0] * len(self.world.switches)
-                        state[2 + i] = c
-                        state = torch.tensor(state, dtype=torch.float32)
-                        
-                        z = generate_latent_representation(state, self.model)
-                        BOUND_L = min(BOUND_L, z[0])
-                        BOUND_R = max(BOUND_R, z[0])
-                        BOUND_U = min(BOUND_U, z[1])
-                        BOUND_D = max(BOUND_D, z[1])
+        
+        for state in self.world.all_states:
+            state = torch.tensor(state, dtype=torch.float32)
+            
+            z = generate_latent_representation(state, self.model)
+            BOUND_L = min(BOUND_L, z[0])
+            BOUND_R = max(BOUND_R, z[0])
+            BOUND_U = min(BOUND_U, z[1])
+            BOUND_D = max(BOUND_D, z[1])
+        
         return (BOUND_L, BOUND_R, BOUND_U, BOUND_D)
-
 
     def get_minipos(self, z):
         BOUND_L, BOUND_R, BOUND_U, BOUND_D = self.bounds
@@ -62,19 +60,27 @@ class Renderer:
     
         for x in range(self.world.width):
             for y in range(self.world.height):
-                for i in range(len(self.world.switches)):
-                    for c in [0, 1]:
-                        pg.draw.rect(self.screen, (255, 255, 255), (x * self.scale, y * self.scale, self.scale, self.scale), 1)
-                        state = [x, y] + [0] * len(self.world.switches)
-                        state[2 + i] = c
-                        state = torch.tensor(state, dtype=torch.float32)
-                        
-                        z = generate_latent_representation(state, self.model)
-                        mx, my = self.get_minipos(z)
+                pg.draw.rect(self.screen, (255, 255, 255), (x * self.scale, y * self.scale, self.scale, self.scale), 1)
+        
+        switch_state = []
+        
+        for switch in self.world.switches:
+            switch_state.append(switch.state)
 
-                        pg.draw.circle(self.screen, GRAY, ( \
-                            self.world.width * self.scale + mx - (self.marker // 2), \
-                            my - (self.marker // 2)), self.marker)
+        for state in self.world.all_states:
+            state = torch.tensor(state, dtype=torch.float32)
+            
+            z = generate_latent_representation(state, self.model)
+            mx, my = self.get_minipos(z)
+
+            color = GRAY
+            
+            if state[2:].int().tolist() == switch_state:
+                color = LGRAY
+
+            pg.draw.circle(self.screen, color, ( \
+                self.world.width * self.scale + mx - (self.marker // 2), \
+                my - (self.marker // 2)), self.marker)
 
         z = generate_latent_representation(self.world.goal, self.model)
         mx, my = self.get_minipos(z)

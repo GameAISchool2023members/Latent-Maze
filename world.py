@@ -1,5 +1,6 @@
 import torch
 import random
+import itertools 
 
 class World:
     class Player:
@@ -19,9 +20,12 @@ class World:
         
         # Setup player
         self.player = self.Player(0, 0)
-        self.switches = [self.Switch(8, 8), self.Switch(4, 8)]
+        self.switches = [self.Switch(6, 6), self.Switch(4, 6)]
         self.prev_vel = 0
         
+        self.state_size = 2 + len(self.switches)
+        self.switch_states = []
+        self.all_states = self.precompute_states()
         # Setup goal
         self.goal = self.sample()
 
@@ -44,15 +48,28 @@ class World:
                 switch.state = 0 if switch.state == 1 else 1
         self.prev_vel = 0
 
-    def sample(self):
-        tensor = torch.rand(2 + len(self.switches))
-        for i in range(len(self.switches)):
-            tensor[2 + i] = random.choice([0, 1])
-        return tensor
+        if self.goal.int().tolist() == self.get_state().int().tolist():
+            print('You won!!')
+
+    def sample(self, reachable=True):
+        state = [random.randint(0, self.width - 1), random.randint(0, self.height - 1)]
+        if not reachable:
+            state = [random.uniform(0, self.width), random.uniform(0, self.height)]
+        for _ in range(len(self.switches)):
+            state.append(random.choice([0, 1]))
+        return torch.tensor(state, dtype=torch.float32)
     
     def get_state(self):
         state = [self.player.x, self.player.y]
         for switch in self.switches:
             state.append(switch.state)
-        state = torch.tensor(state, dtype=torch.float32)
-        return state
+        return torch.tensor(state, dtype=torch.float32)
+    
+    def precompute_states(self):
+        states = []
+        switch_states = list(itertools.product(list(range(2)), repeat=len(self.switches)))
+        for x in range(self.width):
+            for y in range(self.height):
+                for state in switch_states:
+                    states.append([x, y] + list(state))
+        return states

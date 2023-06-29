@@ -10,8 +10,8 @@ from render import Renderer
 from torch.utils.data import DataLoader, TensorDataset
 
 # World settings
-GRID_WIDTH = 10
-GRID_HEIGHT = 10
+GRID_WIDTH = 8
+GRID_HEIGHT = 8
 
 # Visual settings
 GRID_SIZE = 32
@@ -24,13 +24,8 @@ HIDDEN = 8
 
 world = World(GRID_WIDTH, GRID_HEIGHT)
 
-input_data = [world.sample().tolist() for _ in range(10000)]
-
-print(input_data[0])
-
+input_data = [world.sample(reachable=False).tolist() for _ in range(1000)]
 input_tensor = torch.tensor(input_data, dtype=torch.float32)
-
-print(input_tensor[0])
 
 dataset = TensorDataset(input_tensor)
 
@@ -38,8 +33,8 @@ batch_size = 64
 dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
 #vae = VAE(3, 64, 2)
-ae = Autoencoder(4, 2, 16)
-ae.train(dataloader, 10)
+ae = Autoencoder(world.state_size, 2, 16)
+ae.train(dataloader, 100)
 
 #vae.train(dataloader, 10)
 
