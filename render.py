@@ -99,7 +99,10 @@ class Renderer:
                 pg.draw.line(self.screen, (255, 255, 255), \
                             (switch.x * self.scale, switch.y * self.scale + self.scale / 2), \
                             ((switch.x + 1) * self.scale, switch.y * self.scale + self.scale / 2))
-            
+        
+        for coin in self.world.coins:
+            pg.draw.circle(self.screen, (200, 200, 0), (coin.x * self.scale + self.scale // 2, coin.y * self.scale + self.scale // 2), self.scale // 4)
+
         pg.draw.rect(self.screen, (255, 255, 255), (self.world.width * self.scale, 0, self.mmap_size, self.mmap_size), 1)        
         pg.draw.circle(self.screen, GREEN, (self.world.player.x * self.scale + self.scale // 2, self.world.player.y * self.scale + self.scale // 2), self.scale // 2)
 

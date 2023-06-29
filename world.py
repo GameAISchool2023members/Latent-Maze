@@ -13,6 +13,11 @@ class World:
             self.x = x
             self.y = y
             self.state = 0
+
+    class Coin:
+        def __init__(self, x, y):
+            self.x = x
+            self.y = y
     
     def __init__(self, width, height):
         self.width = width
@@ -21,9 +26,10 @@ class World:
         # Setup player
         self.player = self.Player(0, 0)
         self.switches = [self.Switch(6, 6), self.Switch(4, 6)]
+        self.coins = [self.Coin(3, 4), self.Coin(3, 5)] 
         self.prev_vel = 0
         
-        self.state_size = 2 + len(self.switches)
+        self.state_size = 3 + len(self.switches)
         self.switch_states = []
         self.all_states = self.precompute_states()
         # Setup goal
@@ -48,6 +54,8 @@ class World:
                 switch.state = 0 if switch.state == 1 else 1
         self.prev_vel = 0
 
+        self.coins = [coin for coin in self.coins if self.player.x != coin.x or self.player.y != coin.y]
+
         if self.goal.int().tolist() == self.get_state().int().tolist():
             print('You won!!')
 
@@ -57,12 +65,14 @@ class World:
             state = [random.uniform(0, self.width), random.uniform(0, self.height)]
         for _ in range(len(self.switches)):
             state.append(random.choice([0, 1]))
+        state.append(random.randint(0, len(self.coins) - 1))
         return torch.tensor(state, dtype=torch.float32)
     
     def get_state(self):
         state = [self.player.x, self.player.y]
         for switch in self.switches:
             state.append(switch.state)
+        state.append(len(self.coins))
         return torch.tensor(state, dtype=torch.float32)
     
     def precompute_states(self):
@@ -72,4 +82,9 @@ class World:
             for y in range(self.height):
                 for state in switch_states:
                     states.append([x, y] + list(state))
-        return states
+        final_states = []
+        for c in range(len(self.coins) + 1):
+            for state in states:
+                final_states.append(state + [c])
+                print(state + [c])
+        return final_states
