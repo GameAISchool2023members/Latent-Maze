@@ -18,11 +18,28 @@ class Autoencoder(nn.Module):
             nn.Linear(hidden, input_size),
             nn.Sigmoid()  # Sigmoid activation for output
         )
+        self.criterion = nn.MSELoss()
+        self.optimizer = optim.Adam(self.parameters(), lr=0.001)
+
     
     def forward(self, x):
         encoded = self.encoder(x)
         decoded = self.decoder(encoded)
         return decoded
+    
+    def train(self, dataloader, num_epochs):
+        for epoch in range(num_epochs):
+            for batch_data in dataloader:
+                batch_data = batch_data[0]
+                outputs = self(batch_data)
+                
+                loss = self.criterion(outputs, batch_data)
+                
+                self.optimizer.zero_grad()
+                loss.backward()
+                self.optimizer.step()
+                
+            print(f"Epoch [{epoch + 1}/{num_epochs}], Loss: {loss.item():.4f}")
 
 class VAE(nn.Module):
     def __init__(self, input_size, hidden_size, latent_size):

@@ -1,3 +1,6 @@
+import torch
+import random
+
 class World:
     class Player:
         def __init__(self, x, y):
@@ -16,13 +19,11 @@ class World:
         
         # Setup player
         self.player = self.Player(0, 0)
-        self.switch = self.Switch(8, 8)
+        self.switches = [self.Switch(8, 8), self.Switch(4, 8)]
         self.prev_vel = 0
-        self.cstate = 0
-
+        
         # Setup goal
-        self.goal_x = 0
-        self.goal_y = 0
+        self.goal = self.sample()
 
     def move_player(self, dx, dy):
         if dy < 0 and self.player.y > 0:
@@ -38,7 +39,20 @@ class World:
         self.prev_vel = 1
 
     def step(self):
-        if self.player.x == self.switch.x and self.player.y == self.switch.y and self.prev_vel > 0:
-            self.switch.state = 0 if self.switch.state == 1 else 1
-            self.cstate = self.switch.state
+        for switch in self.switches:
+            if self.player.x == switch.x and self.player.y == switch.y and self.prev_vel > 0:
+                switch.state = 0 if switch.state == 1 else 1
         self.prev_vel = 0
+
+    def sample(self):
+        tensor = torch.rand(2 + len(self.switches))
+        for i in range(len(self.switches)):
+            tensor[2 + i] = random.choice([0, 1])
+        return tensor
+    
+    def get_state(self):
+        state = [self.player.x, self.player.y]
+        for switch in self.switches:
+            state.append(switch.state)
+        state = torch.tensor(state, dtype=torch.float32)
+        return state
