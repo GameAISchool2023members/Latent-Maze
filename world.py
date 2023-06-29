@@ -29,7 +29,7 @@ class World:
         self.coins = [self.Coin(3, 4), self.Coin(3, 5)] 
         self.prev_vel = 0
         
-        self.state_size = 3 + len(self.switches)
+        self.state_size = 1 + len(self.switches)
         self.switch_states = []
         self.all_states = self.precompute_states()
         # Setup goal
@@ -59,17 +59,16 @@ class World:
         if self.goal.int().tolist() == self.get_state().int().tolist():
             print('You won!!')
 
-    def sample(self, reachable=True):
-        state = [random.randint(0, self.width - 1), random.randint(0, self.height - 1)]
-        if not reachable:
-            state = [random.uniform(0, self.width), random.uniform(0, self.height)]
+    def sample(self):
+        state = []
+        
         for _ in range(len(self.switches)):
             state.append(random.choice([0, 1]))
         state.append(random.randint(0, len(self.coins) - 1))
         return torch.tensor(state, dtype=torch.float32)
     
     def get_state(self):
-        state = [self.player.x, self.player.y]
+        state = []
         for switch in self.switches:
             state.append(switch.state)
         state.append(len(self.coins))
@@ -78,13 +77,8 @@ class World:
     def precompute_states(self):
         states = []
         switch_states = list(itertools.product(list(range(2)), repeat=len(self.switches)))
-        for x in range(self.width):
-            for y in range(self.height):
-                for state in switch_states:
-                    states.append([x, y] + list(state))
         final_states = []
         for c in range(len(self.coins) + 1):
-            for state in states:
-                final_states.append(state + [c])
-                print(state + [c])
+            for state in switch_states:
+                final_states.append(list(state) + [c])
         return final_states

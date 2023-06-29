@@ -24,7 +24,7 @@ HIDDEN = 8
 
 world = World(GRID_WIDTH, GRID_HEIGHT)
 
-input_data = [world.sample(reachable=False).tolist() for _ in range(1000)]
+input_data = [world.sample().tolist() for _ in range(1000)]
 input_tensor = torch.tensor(input_data, dtype=torch.float32)
 
 dataset = TensorDataset(input_tensor)
@@ -37,12 +37,6 @@ ae = Autoencoder(world.state_size, 2, 16)
 ae.train(dataloader, 100)
 
 #vae.train(dataloader, 10)
-
-def generate_game_state(latent, model):
-    latent_tensor = torch.Tensor(latent).unsqueeze(0)
-    outputs = model.decoder(latent_tensor)
-    game_state = outputs.squeeze().detach().numpy().reshape((GRID_HEIGHT, GRID_WIDTH))
-    return game_state
 
 load = False
 
