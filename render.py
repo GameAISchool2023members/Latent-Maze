@@ -10,6 +10,8 @@ LGRAY = (128, 128, 128)
 
 YELLOW = (255, 255, 0)
 
+PAD_FACTOR = 0.1
+
 def preprocess_state(state):
     return torch.Tensor(state.flatten()).unsqueeze(0)
 
@@ -47,6 +49,11 @@ class Renderer:
             BOUND_U = min(BOUND_U, z[1])
             BOUND_D = max(BOUND_D, z[1])
         
+        BOUND_L -= abs(BOUND_L) * PAD_FACTOR
+        BOUND_R += abs(BOUND_R) * PAD_FACTOR
+        BOUND_U -= abs(BOUND_U) * PAD_FACTOR
+        BOUND_D += abs(BOUND_D) * PAD_FACTOR
+    
         return (BOUND_L, BOUND_R, BOUND_U, BOUND_D)
 
     def get_minipos(self, z):
