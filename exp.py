@@ -4,10 +4,10 @@ import random
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from models import Autoencoder
+from models import Autoencoder, VAE
 from world import World
 from render import Renderer
-
+from torch.utils.data import DataLoader, TensorDataset
 
 # World settings
 GRID_WIDTH = 10
@@ -24,13 +24,11 @@ HIDDEN = 8
 
 world = World(GRID_WIDTH, GRID_HEIGHT)
 
-# Set up the autoencoder
 input_size = 3
 latent_size = 2
 
 models = [Autoencoder(input_size, latent_size, HIDDEN) for _ in range(1)]
 
-# Define loss function and optimizer
 criterion = nn.MSELoss()
 optimizer = optim.Adam(models[0].parameters(), lr=0.001)
 
@@ -47,31 +45,39 @@ def generate_random_state():
     tensor[2] = random.choice([0, 1])
     return tensor
 
+input_data = [generate_random_state().tolist() for _ in range(10000)]
+
+print(input_data[0])
+
+input_tensor = torch.tensor(input_data, dtype=torch.float32)
+
+print(input_tensor[0])
+
+dataset = TensorDataset(input_tensor)
+
+batch_size = 64
+dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+
+vae = VAE(3, 64, 2)
+
+vae.train(dataloader, 10)
+
 for model in models:
-    # Training loop
     for epoch in range(EPOCHS):
-        # Generate random game state
         game_state = generate_random_state()
         
-        # Forward pass
         inputs = preprocess_state(game_state)
         outputs = model(inputs)
         
-        # Compute the loss
         loss = criterion(outputs, inputs)
         
-        # Backward pass and optimization
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
         
-        # Print the loss every 100 epochs
         if (epoch + 1) % 100 == 0:
             print(f"Epoch [{epoch+1}/{EPOCHS}], Loss: {loss.item():.4f}")
 
-# Generate latent representation for a game state
-
-# Generate game state from latent representation
 def generate_game_state(latent, model):
     latent_tensor = torch.Tensor(latent).unsqueeze(0)
     outputs = model.decoder(latent_tensor)
@@ -95,7 +101,7 @@ for model in models:
 load = True
 
 if load:
-    model = torch.load('test.pkl')
+    model = torch.load('level2.pkl')
     BOUND_L, BOUND_R, BOUND_U, BOUND_D = (0, 0, 0, 0)
     for x in range(GRID_WIDTH):
         for y in range(GRID_HEIGHT):
@@ -108,10 +114,10 @@ if load:
                 BOUND_D = max(BOUND_D, z[1])
     bounds = (BOUND_L, BOUND_R, BOUND_U, BOUND_D)
 
-    render = Renderer(world, GRID_SIZE, MMAP_SIZE, model, bounds, MARKER)
+    render = Renderer(world, GRID_SIZE, MMAP_SIZE, model, MARKER)
 else:
     torch.save(models[0], 'test.pkl')
-    render = Renderer(world, GRID_SIZE, MMAP_SIZE, models[0], bounds[0], MARKER)
+    render = Renderer(world, GRID_SIZE, MMAP_SIZE, vae, MARKER)
 
 while True:
     for event in pygame.event.get():

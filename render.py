@@ -21,7 +21,6 @@ class Renderer:
         pg.init()
         self.world = world
         self.model = model
-        
         self.bounds = self.find_bounds()
         
         SCREEN_WIDTH = world.width * scale + mmap_size
@@ -30,7 +29,6 @@ class Renderer:
         self.scale = scale
         self.mmap_size = mmap_size
         self.marker = marker
-
 
         self.screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pg.display.set_caption('Latent Maze')
@@ -89,10 +87,7 @@ class Renderer:
                         (self.world.switch.x * self.scale, self.world.switch.y * self.scale + self.scale / 2), \
                         ((self.world.switch.x + 1) * self.scale, self.world.switch.y * self.scale + self.scale / 2))
             
-        # Minimap
-        pg.draw.rect(self.screen, (255, 255, 255), (self.world.width * self.scale, 0, 128, 128), 1)
-        
-        # Draw the ball
+        pg.draw.rect(self.screen, (255, 255, 255), (self.world.width * self.scale, 0, 128, 128), 1)        
         pg.draw.circle(self.screen, GREEN if self.world.cstate == 0 else BLUE, (self.world.player.x * self.scale + self.scale // 2, self.world.player.y * self.scale + self.scale // 2), self.scale // 2)
 
         state = torch.tensor([self.world.player.x, self.world.player.y, self.world.cstate], dtype=torch.float32)
@@ -104,6 +99,5 @@ class Renderer:
             my - (self.marker // 2)), \
             self.marker)
 
-        # Update the display
         pg.display.flip()
         
