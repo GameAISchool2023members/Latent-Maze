@@ -18,13 +18,14 @@ class Level:
         self,
         levelFile: str = ''
     ):
-        levelData = dict()
-        with open(levelFile) as jsonFile:
-            levelData = json.load(jsonFile)
+        self.levelData = dict()
+        with open(f'{levelFile}.json') as jsonFile:
+            self.levelData = json.load(jsonFile)
 
-        self.levelName = levelData.get('name', '')
+        levelName = self.levelData.get('name', '')
+        pygame.display.set_caption(f'Latent Maze {levelName}')
 
-        self.world = World(config=levelData)
+        self.world = World(config=self.levelData)
 
         inputData = []
         for _ in range(1000):
@@ -59,11 +60,17 @@ class Level:
                         self.world.move_player(-1, 0)
                     elif event.key == pygame.K_RIGHT:
                         self.world.move_player(1, 0)
+                    elif event.key == pygame.K_r:
+                        self.world = World(self.levelData)
+                        self.renderer = Renderer(world=self.world, scale=32, mmap_size=256, model=autoEncoder, marker=4)
             isWinState = self.world.step()
             if isWinState:
-                self.unloadLevel()
+                self.loadNextLevel()
             self.renderer.step()
             clock.tick(30)
 
-    def unloadLevel(self):
+    def loadNextLevel(self):
         self.levelActive = False
+        nextLevel = self.levelData.get('nextLevel')
+        if nextLevel:
+            Level(nextLevel)
