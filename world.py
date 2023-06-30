@@ -73,7 +73,7 @@ class World:
             return
         self.prev_vel = 1
 
-    def step(self):
+    def step(self) -> bool:
         for switch in self.switches:
             if self.player.x == switch.x and self.player.y == switch.y and self.prev_vel > 0:
                 switch.state = 0 if switch.state == 1 else 1
@@ -85,6 +85,8 @@ class World:
 
         if self.goal.int().tolist() == self.get_state().int().tolist():
             print('You won!!')
+            return True
+        return False
 
     def sample(self):
         state = []

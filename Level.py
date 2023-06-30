@@ -1,3 +1,4 @@
+import json
 import sys
 
 import pygame.event
@@ -8,28 +9,26 @@ from models import Autoencoder
 from world import World
 from render import Renderer
 
-DEFAULT_GRID_WIDTH = 8
-DEFAULT_GRID_HEIGHT = 8
-
 BATCH_SIZE = 64
 
 
-class LevelBase:
+class Level:
 
     def __init__(
         self,
-        levelName: str = 'level',
+        levelFile: str = ''
     ):
-        self.levelName = levelName
+        levelData = dict()
+        with open(levelFile) as jsonFile:
+            levelData = json.load(jsonFile)
 
-        self.width = DEFAULT_GRID_WIDTH
-        self.height = DEFAULT_GRID_HEIGHT
+        self.levelName = levelData.get('name', '')
 
-        self.world = World(self.width, self.height)
+        self.world = World(config=levelData)
 
         inputData = []
         for _ in range(1000):
-            inputData.append(self.world.sample(reachable=False).tolist())
+            inputData.append(self.world.sample().tolist())
         print(f'inputdata[0]: {inputData[0]}')
 
         inputTensor = torch.tensor(inputData, dtype=torch.float32)
@@ -39,12 +38,13 @@ class LevelBase:
 
         tensorDataLoader = DataLoader(tensorDataset, batch_size=BATCH_SIZE, shuffle=True)
 
-        autoEncoder = Autoencoder(input_size=4, latent_size=2, hidden=16)
+        autoEncoder = Autoencoder(input_size=self.world.state_size, latent_size=2, hidden=16)
         autoEncoder.train(tensorDataLoader, num_epochs=100)
 
         self.renderer = Renderer(world=self.world, scale=32, mmap_size=256, model=autoEncoder, marker=4)
 
         self.levelActive = True
+        clock = pygame.time.Clock()
         while self.levelActive:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -59,13 +59,11 @@ class LevelBase:
                         self.world.move_player(-1, 0)
                     elif event.key == pygame.K_RIGHT:
                         self.world.move_player(1, 0)
-            self.world.step()
+            isWinState = self.world.step()
+            if isWinState:
+                self.unloadLevel()
             self.renderer.step()
-
-    def generateGameState(self, latentPoint, model):
-        latentTensor = torch.Tensor(latentPoint).unsqueeze(0)
-        outputs = model.decoder(latentTensor)
-        return outputs.squeeze().detach().numpy().reshape((self.width, self.height))
+            clock.tick(30)
 
     def unloadLevel(self):
         self.levelActive = False

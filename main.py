@@ -1,3 +1,3 @@
-from Level1 import Level1
+from Level import Level
 
-Level1()
+level1 = Level('level1.json')
