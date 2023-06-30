@@ -70,6 +70,8 @@ class Renderer:
 
         for x in range(self.world.width):
             for y in range(self.world.height):
+                if self.world.walls[x][y] == 1:
+                    pg.draw.rect(self.screen, GRAY, (x * self.scale, y * self.scale, self.scale, self.scale))
                 pg.draw.rect(self.screen, (255, 255, 255), (x * self.scale, y * self.scale, self.scale, self.scale), 1)
 
         switch_state = []
@@ -84,9 +86,6 @@ class Renderer:
             mx, my = self.get_minipos(z)
 
             color = GRAY
-
-            if state[2:].int().tolist() == switch_state:
-                color = LGRAY
 
             pg.draw.circle(
                 self.screen,
