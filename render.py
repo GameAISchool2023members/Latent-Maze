@@ -129,6 +129,14 @@ class Renderer:
                 self.scale // 4
             )
 
+        for npc in self.world.npcs:
+            pg.draw.circle(
+                self.screen,
+                (100, 200, 0),
+                (npc.path[npc.idx][0] * self.scale + self.scale // 2, npc.path[npc.idx][1] * self.scale + self.scale // 2),
+                self.scale // 4
+            )
+
         pg.draw.rect(
             self.screen,
             (255, 255, 255),

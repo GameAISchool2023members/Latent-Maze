@@ -47,6 +47,8 @@ else:
     #torch.save(models[0], 'test.pkl')
     render = Renderer(world, GRID_SIZE, MMAP_SIZE, ae, MARKER)
 
+clock = pygame.time.Clock()
+
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -63,6 +65,9 @@ while True:
                 world.move_player(1, 0)
             elif event.key == pygame.K_SPACE:
                 world.switch.state = 0 if world.switch.state == 1 else 1
-    
+            elif event.key == pygame.K_r:
+                world = World(GRID_WIDTH, GRID_HEIGHT)
+                render = Renderer(world, GRID_SIZE, MMAP_SIZE, ae, MARKER)
     world.step()
     render.step()
+    clock.tick(30)
