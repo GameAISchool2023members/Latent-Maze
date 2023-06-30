@@ -10,7 +10,7 @@ LGRAY = (128, 128, 128)
 
 YELLOW = (255, 255, 0)
 
-PAD_FACTOR = 0.1
+PAD_FACTOR = 0.2
 
 
 def preprocess_state(state):

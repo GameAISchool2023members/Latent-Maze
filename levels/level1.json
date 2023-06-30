@@ -1,0 +1,11 @@
+{
+    "width" : 8,
+    "height" : 8,
+    "player_start" : [2, 4],
+    "switches" : [[3, 6], [6, 6]],
+    "coins" : [],
+    "npcs" : [],
+    "walls" : [],
+    "crates" : [],
+    "goal" : [1, 1, 0]
+}

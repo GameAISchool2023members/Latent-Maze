@@ -15,7 +15,7 @@ GRID_WIDTH = 8
 GRID_HEIGHT = 8
 
 # Visual settings
-GRID_SIZE = 32
+GRID_SIZE = 48
 MMAP_SIZE = 256
 MARKER = 4
 
@@ -23,7 +23,9 @@ MARKER = 4
 EPOCHS = 1000
 HIDDEN = 8
  
-with open('level1.json') as json_file:
+fname = 'level1.json'
+
+with open(fname) as json_file:
     config = json.load(json_file)
 
 world = World(config)
@@ -45,10 +47,10 @@ ae.train(dataloader, 100)
 load = False
 
 if load:
-    model = torch.load('level2.pkl')
+    model = torch.load(fname.split('.')[0] + '.pkl')
     render = Renderer(world, GRID_SIZE, MMAP_SIZE, model, MARKER)
 else:
-    #torch.save(models[0], 'test.pkl')
+    torch.save(ae, fname.split('.')[0] + '.pkl')
     render = Renderer(world, GRID_SIZE, MMAP_SIZE, ae, MARKER)
 
 clock = pygame.time.Clock()

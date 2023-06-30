@@ -56,7 +56,13 @@ class World:
         self.coins = [self.Coin(pt[0], pt[1]) for pt in config['coins']]
         self.npcs = [self.NPC(path, 30) for path in config['npcs']]
         self.crates = [self.Crate(pt[0], pt[1]) for pt in config['crates']]
+        
         self.goal = self.sample()
+        
+        if 'goal' in config:
+            self.goal = torch.tensor(config['goal'], dtype=torch.float32)
+        
+        print(self.goal)
 
         self.state_size = 1 + len(self.switches) + len(self.npcs) + len(self.crates) * 2
         self.all_states = self.precompute_states()
