@@ -132,7 +132,7 @@ class Renderer:
         for npc in self.world.npcs:
             pg.draw.circle(
                 self.screen,
-                (100, 200, 0),
+                (100, 100, 255),
                 (npc.path[npc.idx][0] * self.scale + self.scale // 2, npc.path[npc.idx][1] * self.scale + self.scale // 2),
                 self.scale // 4
             )

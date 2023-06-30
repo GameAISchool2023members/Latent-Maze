@@ -1,6 +1,7 @@
 import pygame
 import sys
 import random
+import json
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -21,8 +22,11 @@ MARKER = 4
 # Model settings
 EPOCHS = 1000
 HIDDEN = 8
+ 
+with open('level1.json') as json_file:
+    config = json.load(json_file)
 
-world = World(GRID_WIDTH, GRID_HEIGHT)
+world = World(config)
 
 input_data = [world.sample().tolist() for _ in range(1000)]
 input_tensor = torch.tensor(input_data, dtype=torch.float32)
@@ -66,7 +70,7 @@ while True:
             elif event.key == pygame.K_SPACE:
                 world.switch.state = 0 if world.switch.state == 1 else 1
             elif event.key == pygame.K_r:
-                world = World(GRID_WIDTH, GRID_HEIGHT)
+                world = World(config)
                 render = Renderer(world, GRID_SIZE, MMAP_SIZE, ae, MARKER)
     world.step()
     render.step()

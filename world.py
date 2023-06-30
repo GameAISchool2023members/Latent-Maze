@@ -35,17 +35,17 @@ class World:
                 self.x, self.y = self.path[self.idx]
                 self.fcount = 0
             
-    def __init__(self, width, height):
-        self.width = width
-        self.height = height
+    def __init__(self, config):
+        self.width = config['width']
+        self.height = config['height']
         
         # Setup world content
         self.player = self.Player(0, 0)
         self.prev_vel = 0
 
-        self.switches = [self.Switch(6, 6), self.Switch(4, 6)]
-        self.coins = [self.Coin(3, 4), self.Coin(3, 5), self.Coin(3, 6), self.Coin(3, 7)] 
-        self.npcs = [self.NPC([(2, 2), (3, 2), (4, 2), (3, 2)], 30)]
+        self.switches = [self.Switch(pt[0], pt[1]) for pt in config['switches']]
+        self.coins = [self.Coin(pt[0], pt[1]) for pt in config['coins']]
+        self.npcs = [self.NPC(path, 30) for path in config['npcs']]
         self.goal = self.sample()        
 
         self.state_size = 1 + len(self.switches) + len(self.npcs)
@@ -73,7 +73,7 @@ class World:
         self.coins = [coin for coin in self.coins if self.player.x != coin.x or self.player.y != coin.y]
         for npc in self.npcs:
             npc.step()
-            
+
         if self.goal.int().tolist() == self.get_state().int().tolist():
             print('You won!!')
 
@@ -82,7 +82,7 @@ class World:
         
         for _ in range(len(self.switches)):
             state.append(random.choice([0, 1]))
-        state.append(random.randint(0, len(self.coins) - 1))
+        state.append(random.randint(0, len(self.coins) - 1) if len(self.coins) > 0 else 0)
         for npc in self.npcs:
             state.append(random.randint(0, len(npc.path) - 1))
         return torch.tensor(state, dtype=torch.float32)
