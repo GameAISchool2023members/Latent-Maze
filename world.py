@@ -58,9 +58,9 @@ class World:
         self.crates = [self.Crate(pt[0], pt[1]) for pt in config['crates']]
         self.goal = self.sample()
 
-        self.state_size = 1 + len(self.switches) + len(self.npcs)
+        self.state_size = 1 + len(self.switches) + len(self.npcs) + len(self.crates) * 2
         self.all_states = self.precompute_states()
-        
+
     def move_player(self, dx, dy):
         if self.resolve_crates(dx, dy):
             return
@@ -104,15 +104,26 @@ class World:
         state.append(random.randint(0, len(self.coins) - 1) if len(self.coins) > 0 else 0)
         for npc in self.npcs:
             state.append(random.randint(0, len(npc.path) - 1))
+        for crate in self.crates:
+            state.append(random.randint(0, self.width - 1))
+            state.append(random.randint(0, self.height - 1))
+
         return torch.tensor(state, dtype=torch.float32)
     
     def get_state(self):
         state = []
+        
         for switch in self.switches:
             state.append(switch.state)
         state.append(len(self.coins))
+        
         for npc in self.npcs:
             state.append(npc.idx)
+
+        for crate in self.crates:
+            state.append(crate.x)
+            state.append(crate.y)
+        
         return torch.tensor(state, dtype=torch.float32)
     
     def resolve_crates(self, dx, dy):
@@ -149,5 +160,13 @@ class World:
                     temp.append(state + [i])
             final_states = temp
 
-        
+        for crate in self.crates:
+            temp = []
+            for x in range(self.width):
+                for y in range(self.height):
+                    if self.walls[x][y] == 0:
+                        for state in final_states:
+                            temp.append(state + [x, y])
+            final_states = temp
+
         return final_states
