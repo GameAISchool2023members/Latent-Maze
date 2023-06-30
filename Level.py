@@ -22,9 +22,6 @@ class Level:
         with open(f'{levelFile}.json') as jsonFile:
             self.levelData = json.load(jsonFile)
 
-        levelName = self.levelData.get('name', '')
-        pygame.display.set_caption(f'Latent Maze {levelName}')
-
         self.world = World(config=self.levelData)
 
         inputData = []
@@ -43,6 +40,9 @@ class Level:
         autoEncoder.train(tensorDataLoader, num_epochs=100)
 
         self.renderer = Renderer(world=self.world, scale=32, mmap_size=256, model=autoEncoder, marker=4)
+
+        levelName = self.levelData.get('levelName', '')
+        pygame.display.set_caption(f'Latent Maze {levelName}')
 
         self.levelActive = True
         clock = pygame.time.Clock()
@@ -70,6 +70,7 @@ class Level:
             clock.tick(30)
 
     def loadNextLevel(self):
+        pygame.display.set_caption('🎉 YOU WON! 🎉')
         self.levelActive = False
         nextLevel = self.levelData.get('nextLevel')
         if nextLevel:

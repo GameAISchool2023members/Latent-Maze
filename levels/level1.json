@@ -7,5 +7,7 @@
     "npcs" : [],
     "walls" : [],
     "crates" : [],
-    "goal" : [1, 1, 0]
+    "goal" : [1, 1, 0],
+    "nextLevel": "levels/level2",
+    "levelName": "level 1"
 }
