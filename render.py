@@ -136,6 +136,14 @@ class Renderer:
                 self.scale // 4
             )
 
+        for crate in self.world.crates:
+            pg.draw.rect(
+                self.screen, 
+                (0, 255, 0), 
+                (crate.x * self.scale + 4, crate.y * self.scale + 4, self.scale - 8, self.scale - 8), 
+                1
+            )
+
         pg.draw.rect(
             self.screen,
             (255, 255, 255),

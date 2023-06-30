@@ -49,25 +49,33 @@ class World:
             self.walls[wall[0], wall[1]] = 1
         
         # Setup world content
-        self.player = self.Player(0, 0)
+        self.player = self.Player(config['player_start'][0], config['player_start'][1])
         self.prev_vel = 0
 
         self.switches = [self.Switch(pt[0], pt[1]) for pt in config['switches']]
         self.coins = [self.Coin(pt[0], pt[1]) for pt in config['coins']]
         self.npcs = [self.NPC(path, 30) for path in config['npcs']]
+        self.crates = [self.Crate(pt[0], pt[1]) for pt in config['crates']]
         self.goal = self.sample()
 
         self.state_size = 1 + len(self.switches) + len(self.npcs)
         self.all_states = self.precompute_states()
         
     def move_player(self, dx, dy):
-        if dy < 0 and self.player.y > 0 and self.walls[self.player.x][self.player.y - 1] == 0:
+        if self.resolve_crates(dx, dy):
+            return
+        
+        solids = self.walls.copy()
+        for crate in self.crates:
+            solids[crate.x][crate.y] = 1
+
+        if dy < 0 and self.player.y > 0 and solids[self.player.x][self.player.y - 1] == 0:
             self.player.y -= 1
-        elif dy > 0 and self.player.y < self.height - 1 and self.walls[self.player.x][self.player.y + 1] == 0:
+        elif dy > 0 and self.player.y < self.height - 1 and solids[self.player.x][self.player.y + 1] == 0:
             self.player.y += 1
-        elif dx < 0 and self.player.x > 0 and self.walls[self.player.x - 1][self.player.y] == 0:
+        elif dx < 0 and self.player.x > 0 and solids[self.player.x - 1][self.player.y] == 0:
             self.player.x -= 1
-        elif dx > 0 and self.player.x < self.width - 1 and self.walls[self.player.x + 1][self.player.y] == 0:
+        elif dx > 0 and self.player.x < self.width - 1 and solids[self.player.x + 1][self.player.y] == 0:
             self.player.x += 1
         else:
             return
@@ -107,6 +115,25 @@ class World:
             state.append(npc.idx)
         return torch.tensor(state, dtype=torch.float32)
     
+    def resolve_crates(self, dx, dy):
+        for target_crate in self.crates:
+            if self.player.x + dx == target_crate.x and self.player.y + dy == target_crate.y:
+                solids = self.walls.copy()
+                for crate in self.crates:
+                    solids[crate.x][crate.y] = 1
+                for npc in self.npcs:
+                    solids[npc.x][npc.y] = 1
+                for switch in self.switches:
+                    solids[switch.x][switch.y] = 1
+                for coin in self.coins:
+                    solids[coin.x][coin.y] = 1
+                if target_crate.x + dx in range(self.width) and target_crate.y + dy in range(self.height) and solids[target_crate.x + dx][target_crate.y + dy] == 0:
+                    target_crate.x += dx
+                    target_crate.y += dy
+                    return True 
+        return False
+
+
     def precompute_states(self):
         states = []
         switch_states = list(itertools.product(list(range(2)), repeat=len(self.switches)))
@@ -122,4 +149,5 @@ class World:
                     temp.append(state + [i])
             final_states = temp
 
+        
         return final_states
