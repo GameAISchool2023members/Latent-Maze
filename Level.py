@@ -27,7 +27,7 @@ class Level:
         self.renderer = Renderer(world=self.world, scale=32, mmap_size=256, model=levelModel, marker=4)
 
         levelName = self.levelData.get('levelName', '')
-        pygame.display.set_caption(f'Latent Maze {levelName}')
+        pygame.display.set_caption(f'Latent Maze — {levelName}')
 
         self.levelActive = True
         clock = pygame.time.Clock()
@@ -47,7 +47,7 @@ class Level:
                         self.world.move_player(1, 0)
                     elif event.key == pygame.K_r:
                         self.world = World(self.levelData)
-                        self.renderer = Renderer(world=self.world, scale=32, mmap_size=256, model=autoEncoder, marker=4)
+                        self.renderer = Renderer(world=self.world, scale=32, mmap_size=256, model=levelModel, marker=4)
             isWinState = self.world.step()
             if isWinState:
                 self.loadNextLevel()
