@@ -3,8 +3,6 @@ import sys
 
 import pygame.event
 import torch
-from torch.utils.data import DataLoader, TensorDataset
-from models import Autoencoder
 
 from world import World
 from render import Renderer
@@ -22,24 +20,11 @@ class Level:
         with open(f'{levelFile}.json') as jsonFile:
             self.levelData = json.load(jsonFile)
 
+        levelModel = torch.load(f'{levelFile}.pkl')
+
         self.world = World(config=self.levelData)
 
-        inputData = []
-        for _ in range(1000):
-            inputData.append(self.world.sample().tolist())
-        print(f'inputdata[0]: {inputData[0]}')
-
-        inputTensor = torch.tensor(inputData, dtype=torch.float32)
-        print(f'inputTensor[0]: {inputTensor[0]}')
-
-        tensorDataset = TensorDataset(inputTensor)
-
-        tensorDataLoader = DataLoader(tensorDataset, batch_size=BATCH_SIZE, shuffle=True)
-
-        autoEncoder = Autoencoder(input_size=self.world.state_size, latent_size=2, hidden=16)
-        autoEncoder.train(tensorDataLoader, num_epochs=100)
-
-        self.renderer = Renderer(world=self.world, scale=32, mmap_size=256, model=autoEncoder, marker=4)
+        self.renderer = Renderer(world=self.world, scale=32, mmap_size=256, model=levelModel, marker=4)
 
         levelName = self.levelData.get('levelName', '')
         pygame.display.set_caption(f'Latent Maze {levelName}')
