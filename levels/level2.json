@@ -10,6 +10,6 @@
         [4, 3], [4, 4], [4, 5]],
     "crates" : [[2, 1]],
     "goal" : [0, 2, 4],
-    "levelName": "push the crate?",
+    "levelName": "Level 2: Push the crate?",
     "nextLevel": "levels/level3"
 }

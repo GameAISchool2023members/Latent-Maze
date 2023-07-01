@@ -9,5 +9,5 @@
     "crates" : [],
     "goal" : [1, 1, 0],
     "nextLevel": "levels/level2",
-    "levelName": "Activate the switches"
+    "levelName": "Level 1: Activate the switches"
 }

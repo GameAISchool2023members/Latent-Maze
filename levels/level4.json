@@ -8,6 +8,6 @@
     "walls" : [],
     "crates" : [],
     "goal" : [0, 1, 2],
-    "levelName": "Fourth",
-    "nextLevel": ""
+    "levelName": "Level 4: Collect 4 coins?",
+    "nextLevel": "levels/level1"
 }

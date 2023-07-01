@@ -8,6 +8,6 @@
     "walls" : [],
     "crates" : [[1, 4]],
     "goal" : [0, 0, 4, 0],
-    "levelName": "Third level",
+    "levelName": "Level 3: Annoy the NPC",
     "nextLevel": "levels/level4"
 }

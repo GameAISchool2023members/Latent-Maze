@@ -27,7 +27,7 @@ class Level:
         self.renderer = Renderer(world=self.world, scale=32, mmap_size=256, model=levelModel, marker=4)
 
         levelName = self.levelData.get('levelName', '')
-        pygame.display.set_caption(f'Latent Maze — {levelName}')
+        pygame.display.set_caption(f'👻 Latent Maze 👻 — {levelName}')
 
         self.levelActive = True
         clock = pygame.time.Clock()
