@@ -14,4 +14,4 @@ This game was created by:
 
 - [Jontahan Jørgensen](https://github.com/Jontahan)
 - [Niels NTG Poldervaart](https://github.com/Niels-NTG)
-- [Dante]
+- [Dante Camarena](https://github.com/MHDante)
